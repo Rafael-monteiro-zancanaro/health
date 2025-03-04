@@ -1,10 +1,9 @@
 use std::{path::PathBuf, process::exit};
-use node::Node;
+use nodes::{from_dir, Node};
+use statistics::NodeStatistics;
 mod icon;
-mod node;
+mod nodes;
 mod statistics;
-mod config;
-mod extraction;
 
 fn main() {
     let relpath = check_args();
@@ -15,14 +14,15 @@ fn main() {
     }
 
     let canonical_path = canonize_rel_path(&relpath.unwrap());
+    extract_from_path(canonical_path);
+}
 
-    if let Ok(dir) = std::fs::read_dir(&canonical_path) {
-        let nodes = extraction::run_over_directory(dir);
-        nodes.iter().for_each(|node| {
-            println!("{}", node)
-        });
+fn extract_from_path(path_buf: PathBuf) {
+    if let Ok(dir) = std::fs::read_dir(&path_buf) {
+        let nodes = from_dir(dir);
+        nodes.iter().for_each(|node| println!("{}", NodeStatistics::from(node)));
     } else {
-        eprintln!("Could not walk over directory {}", &canonical_path.display());
+        eprintln!("Could not walk over directory {}", &path_buf.display());
     }
 }
 
@@ -46,7 +46,11 @@ fn check_args() -> Option<String> {
 
 fn usage() {
     println!("USAGE:");
-    println!("\t health [RELPATH]");
-    println!("RELPATH: Relative path of folder that will be viewed");
+    println!("\t health [RELPATH]||\"--help\"");
+    println!("[RELPATH]: Relative path of folder that will be viewed");
+    println!("--help: Shows detailed information about the program\n");
+    println!("About the statistics");
+    println!("sv (StarVation): The more closer to 100%, more unused the file/diretory is");
+    println!("bt (BloaT): The more closer to 100%, more files it has inside of it");
 }
 
