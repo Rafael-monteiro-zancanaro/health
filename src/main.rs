@@ -1,4 +1,7 @@
-use std::{path::PathBuf, process::exit};
+use std::{
+        path::PathBuf, 
+        process::exit
+};
 use nodes::Node;
 use statistics::NodeStatistics;
 mod icon;
@@ -9,26 +12,26 @@ mod statistics;
 const PROCESS_FAILURE: i32 = 1;
 
 /* Program entrypoint */
-fn main() {
-    let relpath = args_info();
+fn main() 
+{
+	let relpath = args_info();
     
-    if relpath.is_none() {
-        usage();
-        exit(PROCESS_FAILURE);
-    }
+	if relpath.is_none() {
+		usage();
+		exit(PROCESS_FAILURE);
+	}
 
-    let canonical_path = abs_path_of(&relpath.unwrap());
+	let canonical_path = abs_path_of(&relpath.unwrap());
+	let nodes = nodes::from_path(canonical_path);
 
-    let nodes = nodes::from_path(canonical_path);
+	if let Err(checking_error) = nodes {
+		eprintln!("Error: {}", checking_error);
+		exit(PROCESS_FAILURE);
+	}
 
-    if let Err(checking_error) = nodes {
-        eprintln!("Error: {}", checking_error);
-        exit(PROCESS_FAILURE);
-    }
-
-    nodes.unwrap()
-        .iter()
-        .for_each(|node| println!("{}", NodeStatistics::from(node)));
+	nodes.unwrap()
+		.iter()
+		.for_each(|node| println!("{}", NodeStatistics::from(node)));
 }
 
 /*
@@ -40,12 +43,12 @@ fn main() {
     * Output: A PathBuf structure with the absolute path that represents the relative path given.
 */
 fn abs_path_of(relpath: &str) -> PathBuf {
-    let opt_canonical_path = std::fs::canonicalize(relpath.to_string());
-    if opt_canonical_path.is_err() {
-        eprintln!("Cannot open relative path {}", relpath.to_string());
-        exit(PROCESS_FAILURE);
-    }
-    return opt_canonical_path.unwrap();
+    	let opt_canonical_path = std::fs::canonicalize(relpath.to_string());
+	if opt_canonical_path.is_err() {
+        	eprintln!("Cannot open relative path {}", relpath.to_string());
+		exit(PROCESS_FAILURE);
+    	}
+    	return opt_canonical_path.unwrap();
 }
 
 /*
@@ -56,27 +59,28 @@ fn abs_path_of(relpath: &str) -> PathBuf {
 
     * Output: An Option<> enum that carries the relative path given on command line arguments.  
 */
-fn args_info() -> Option<String> {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() != 2 {
-        return None;
-    }
+fn args_info() -> Option<String> 
+{
+	let args: Vec<String> = std::env::args().collect();
+	if args.len() != 2 {
+        	return None;
+    	}
 
-    return Some(args[1].to_string());
+	return Some(args[1].to_string());
 }
 
 /*
     Usage: Prints the usage of the program.
 
-    It is called when someone does not know what is doing.
+    It is called when someone does not know what they're doing.
 */
 fn usage() {
-    println!("USAGE:");
-    println!("\t health [RELPATH]||\"--help\"");
-    println!("[RELPATH]: Relative path of folder that will be viewed");
-    println!("--help: Shows detailed information about the program\n");
-    println!("About the statistics");
-    println!("sv (StarVation): The more closer to 100%, more unused the file/diretory is");
-    println!("bt (BloaT): The more closer to 100%, more files it has inside of it");
+	println!("USAGE:");
+	println!("\t health [RELPATH]||\"--help\"");
+	println!("[RELPATH]: Relative path of folder that will be viewed");
+	println!("--help: Shows detailed information about the program\n");
+	println!("About the statistics");
+	println!("sv (StarVation): The more closer to 100%, more unused the file/diretory is");
+	println!("bt (BloaT): The more closer to 100%, more files it has inside of it");
 }
 
