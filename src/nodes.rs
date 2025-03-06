@@ -34,6 +34,13 @@ impl Node {
     }
 }
 
+pub fn from_path(path_buf: PathBuf) -> Result<Vec<Node>, String> {
+    if let Ok(dir) = std::fs::read_dir(&path_buf) {
+        return Ok(from_dir(dir));
+    } 
+    return Err(format!("Could not walk over directory {}", &path_buf.display()));
+}
+
 pub fn from_dir(dir: ReadDir) -> Vec<Node> {
     let mut nodes: Vec<Node> = Vec::new();
     for opt_entry in dir {
